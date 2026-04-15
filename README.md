@@ -19,12 +19,12 @@ UnbiasNet is an AI-powered fairness auditing platform that crawls any public web
 | Feature | Description |
 |---------|-------------|
 | 🔍 **Deep SPA Crawling** | Puppeteer-based headless browser crawls up to **8 pages across 3 depth levels** — landing → sub-pages → individual job postings & DEI pages |
-| 🤖 **Gemini AI Analysis** | Strict evidence-based audit prompt with **zero hallucination** rules — every claim requires a direct text quote |
-| 📊 **Interactive Dashboard** | Live fairness trend charts, score distributions, audit radar, and scan history — all built with Recharts |
+|  **Gemini AI Analysis** | Strict evidence-based audit prompt with **zero hallucination** rules — every claim requires a direct text quote |
+|  **Interactive Dashboard** | Live fairness trend charts, score distributions, audit radar, and scan history — all built with Recharts |
 | 📄 **DOCX Report Download** | Professional 7-section audit report generated client-side with `docx` library — includes tables, color-coded scores, and methodology |
-| 🌐 **3D Cyber Background** | Subtle WebGL sphere with GLSL shaders, orbital particles, and deep-field stars via React Three Fiber |
+|  **3D Cyber Background** | Subtle WebGL sphere with GLSL shaders, orbital particles, and deep-field stars via React Three Fiber |
 | 🔐 **In-Memory API Keys** | API keys are never persisted to disk, cookies, or localStorage — purely in-memory for maximum security |
-| 🔄 **Model Fallback Chain** | `gemini-2.0-flash` → `gemini-2.5-flash` → `gemini-2.5-pro` — balances free-tier usage with quality |
+|  **Model Fallback Chain** | `gemini-2.0-flash` → `gemini-2.5-flash` → `gemini-2.5-pro` — balances free-tier usage with quality |
 
 ---
 
@@ -215,21 +215,6 @@ The downloadable audit report contains 7 professional sections:
 
 ---
 
-## ⚠️ Disclaimer
-
-> This automated audit is intended as a **first-pass screening tool**. Results should be validated by a qualified human ethics compliance officer before making any consequential decisions. The tool analyzes publicly visible website content only and does not access internal hiring data, algorithms, or decision-making processes.
-
----
-
-## 🏆 Built For
-
-**Google Hackathon** — Demonstrating responsible AI usage with Google Gemini for fairness and bias detection in real-world web applications.
-
----
-
-## 📄 License
-
-MIT License — See [LICENSE](LICENSE) for details.
 
 ---
 
