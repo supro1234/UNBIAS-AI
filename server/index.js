@@ -15,7 +15,7 @@ app.use(express.json());
  * Model chain — highest free quota first, Pro only as last resort.
  * gemini-2.0-flash is dead; removed from chain.
  */
-const MODELS = ['gemini-2.5-flash-lite-preview-06-17', 'gemini-2.5-flash', 'gemini-2.5-pro'];
+const MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
 
 const CACHE_TTL  = 1000 * 60 * 60 * 6; // 6 hours
 const MAX_CHARS_PER_PAGE = 6000;        // ~1 500 tokens per page
@@ -68,6 +68,8 @@ function getBrowserPath() {
     'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
     'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    '/usr/bin/google-chrome',       // Linux / Cloud Run
+    '/usr/bin/chromium-browser',    // Ubuntu/Debian
   ];
   for (const p of paths) { if (fs.existsSync(p)) return p; }
   return null;
@@ -82,7 +84,7 @@ function getBrowserPath() {
 async function callGeminiWithRetry(ai, model, prompt, retries = 3) {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      tickQuota();
+      // tickQuota() is called once per logical audit in callGeminiWithFallback — not per retry
       const result = await ai.models.generateContent({ model, contents: prompt });
       return result;
     } catch (err) {
@@ -103,6 +105,8 @@ async function callGeminiWithRetry(ai, model, prompt, retries = 3) {
  * Returns { response, modelUsed }.
  */
 async function callGeminiWithFallback(ai, prompt) {
+  // Count once per logical audit request — not once per retry attempt
+  tickQuota();
   let lastError = null;
   for (const model of MODELS) {
     try {
@@ -332,6 +336,16 @@ app.post('/api/live-audit', async (req, res) => {
     return res.json({ ...cached.result, fromCache: true });
   }
 
+  // ── Rate-limit gate — block before crawling ───────────────────────────────
+  const now = Date.now();
+  if (now - requestCount.lastMinute > 60_000) { requestCount.minute = 0; requestCount.lastMinute = now; }
+  if (requestCount.minute >= 10) {
+    return res.status(429).json({
+      success: false,
+      error: 'Rate limit reached: please wait up to 60 seconds before the next audit.',
+    });
+  }
+
   try {
     const scrapedPages = await crawlDomain(url);
     if (scrapedPages.length === 0) throw new Error('Could not extract any content from the provided domain.');
@@ -357,10 +371,15 @@ app.post('/api/live-audit', async (req, res) => {
     const { response, modelUsed } = await callGeminiWithFallback(ai, prompt);
 
     const text = response.text || '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Model produced an invalid response format (missing JSON object).');
+    // Use indexOf/lastIndexOf to safely extract the outermost JSON object
+    // — avoids greedy regex misfiring on nested structures or trailing text
+    const start = text.indexOf('{');
+    const end   = text.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) {
+      throw new Error('Model produced an invalid response format (no JSON object found).');
+    }
 
-    const auditData = JSON.parse(jsonMatch[0]);
+    const auditData = JSON.parse(text.slice(start, end + 1));
     auditData.modelUsed = modelUsed; // overwrite with actual model used
 
     // Surface low-confidence findings as warnings
