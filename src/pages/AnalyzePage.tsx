@@ -54,6 +54,10 @@ interface AuditResult {
   industry?: string;
   pagesAnalyzed?: number;
   keyFindings?: string[];
+  confidence?: 'high' | 'medium' | 'low';
+  confidenceWarning?: string;
+  fromCache?: boolean;
+  crawledUrls?: string[];
   analysisResults?: {
     disparateImpact?:    DisparateImpactRow[];
     featureCorrelation?: FeatureCorrelationRow[];
@@ -457,13 +461,38 @@ export default function AnalyzePage({ apiKey }: Props) {
                 <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: C.cyan }}>
                   Gemini AI Deep Research Insights
                 </span>
-                <span style={{ marginLeft: 'auto', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6, background: 'rgba(13,202,240,0.1)', color: C.cyan }}>
-                  {results.modelUsed || 'Gemini AI'}
+                <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {results.fromCache && (
+                    <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6, background: 'rgba(111,66,193,0.15)', color: '#6f42c1', border: '1px solid rgba(111,66,193,0.3)' }}>
+                      ⚡ Cache
+                    </span>
+                  )}
+                  {results.confidence && (
+                    <span style={{
+                      fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6,
+                      ...(results.confidence === 'high'
+                        ? { background: 'rgba(32,201,151,0.12)', color: '#20c997', border: '1px solid rgba(32,201,151,0.3)' }
+                        : results.confidence === 'medium'
+                        ? { background: 'rgba(255,193,7,0.12)',  color: '#ffc107', border: '1px solid rgba(255,193,7,0.3)' }
+                        : { background: 'rgba(220,53,69,0.12)',  color: '#dc3545', border: '1px solid rgba(220,53,69,0.3)' })
+                    }}>
+                      {results.confidence === 'low' ? '⚠ ' : ''}Confidence: {results.confidence}
+                    </span>
+                  )}
+                  <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', padding: '3px 8px', borderRadius: 6, background: 'rgba(13,202,240,0.1)', color: C.cyan }}>
+                    {results.modelUsed || 'Gemini AI'}
+                  </span>
                 </span>
               </div>
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', lineHeight: 1.85, margin: 0, fontStyle: 'italic' }}>
                 "{results.aiReasoning}"
               </p>
+              {results.confidenceWarning && (
+                <div style={{ marginTop: 14, display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px', borderRadius: 10, background: 'rgba(220,53,69,0.07)', border: '1px solid rgba(220,53,69,0.22)' }}>
+                  <AlertTriangle size={15} color="#dc3545" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>{results.confidenceWarning}</span>
+                </div>
+              )}
               {results.industry && (
                 <div style={{ marginTop: 14, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
                   Industry: <strong style={{ color: C.cyan }}>{results.industry}</strong>

@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import {
   ShieldCheck, AlertTriangle, Cpu, ShieldAlert,
-  CheckCircle, X, Activity, RefreshCw, Zap, Globe, Clock, TrendingUp,
+  CheckCircle, X, Activity, RefreshCw, Zap, Globe, Clock, TrendingUp, Database,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -18,6 +18,7 @@ interface ModelHealth {
   fairnessScore: number;
   status:        string;
   lastAudited:   string;
+  modelUsed?:    string;
 }
 
 interface SummaryData {
@@ -38,6 +39,16 @@ interface ScanHistoryEntry {
   keyFlags:         number;
   modelUsed:        string;
   pagesAnalyzed:    number;
+  confidence?:      'high' | 'medium' | 'low';
+}
+
+interface QuotaStatus {
+  requestsThisMinute: number;
+  requestsToday:      number;
+  withinLimits:       boolean;
+  cacheSize:          number;
+  modelsAvailable:    string[];
+  primaryModel:       string;
 }
 
 interface TooltipPayload {
@@ -223,6 +234,59 @@ const BarTip = ({ active, payload }: BarTipProps) => {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
+// ─── Confidence Badge ────────────────────────────────────────────────────────
+
+function ConfidenceBadge({ level }: { level?: string }) {
+  if (!level) return null;
+  const styles: Record<string, React.CSSProperties> = {
+    high:   { background: 'rgba(32,201,151,.12)',  color: '#20c997', border: '1px solid rgba(32,201,151,.3)' },
+    medium: { background: 'rgba(255,193,7,.12)',   color: '#ffc107', border: '1px solid rgba(255,193,7,.3)' },
+    low:    { background: 'rgba(220,53,69,.12)',   color: '#dc3545', border: '1px solid rgba(220,53,69,.3)' },
+  };
+  return (
+    <span style={{ ...styles[level] ?? styles.medium, padding: '2px 8px', borderRadius: 6, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+      {level === 'low' ? '⚠ ' : ''}{level}
+    </span>
+  );
+}
+
+// ─── Quota Bar ────────────────────────────────────────────────────────────────
+
+function QuotaBar({ quota }: { quota: QuotaStatus | null }) {
+  if (!quota) return null;
+  const pct = Math.min(100, (quota.requestsThisMinute / 10) * 100);
+  const barColor = quota.withinLimits ? C.green : C.red;
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+      borderRadius: 14, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 20,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <Database size={14} style={{ color: C.cyan }} />
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '.08em' }}>API Quota</span>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+            {quota.requestsThisMinute}/min &nbsp;·&nbsp; {quota.requestsToday}/day &nbsp;·&nbsp; {quota.cacheSize} cached
+          </span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: barColor }}>
+            {quota.withinLimits ? '✓ Within Limits' : '⚠ Rate Limited'}
+          </span>
+        </div>
+        <div style={{ height: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 3 }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 3, transition: 'width .6s' }} />
+        </div>
+      </div>
+      <div style={{ flexShrink: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)', maxWidth: 180, textAlign: 'right' }}>
+        Model: <span style={{ color: C.cyan, fontFamily: 'monospace' }}>{quota.primaryModel}</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
 export default function Dashboard() {
   const [summary, setSummary]       = useState<SummaryData | null>(null);
   const [history, setHistory]       = useState<ScanHistoryEntry[]>([]);
@@ -230,19 +294,23 @@ export default function Dashboard() {
   const [mitigating, setMitigating] = useState<string | null>(null);
   const [halted, setHalted]         = useState(false);
   const [toast, setToast]           = useState<{ msg: string; type: string } | null>(null);
+  const [quota, setQuota]           = useState<QuotaStatus | null>(null);
 
   const notify = (msg: string, type = 'info') => setToast({ msg, type });
 
   const fetchData = useCallback(async () => {
     try {
-      const [sumR, histR] = await Promise.all([
+      const [sumR, histR, quotaR] = await Promise.all([
         fetch('http://localhost:3001/api/summary'),
         fetch('http://localhost:3001/api/scan-history'),
+        fetch('http://localhost:3001/api/quota-status'),
       ]);
-      const sumD  = await sumR.json()  as SummaryData  & { success: boolean };
-      const histD = await histR.json() as { success: boolean; history: ScanHistoryEntry[] };
+      const sumD   = await sumR.json()   as SummaryData  & { success: boolean };
+      const histD  = await histR.json()  as { success: boolean; history: ScanHistoryEntry[] };
+      const quotaD = await quotaR.json() as QuotaStatus;
       if (sumD.success)  setSummary(sumD);
       if (histD.success) setHistory(histD.history);
+      setQuota(quotaD);
     } catch {
       notify('Backend unavailable — showing cached data', 'error');
     } finally {
@@ -345,8 +413,11 @@ export default function Dashboard() {
         <Stat title="Active Flags" value={loading ? '—' : halted ? '0' : `${summary?.criticalFlags ?? 0}`}
           sub={halted ? 'Suspended' : 'Disparate impact flags'} Icon={AlertTriangle} color={C.red} />
         <Stat title="Engine" value="Gemini"
-          sub={loading ? '—' : summary?.modelHealth?.[0]?.lastAudited ?? 'Never'} Icon={Cpu} color={C.violet} />
+          sub={loading ? '—' : (summary?.modelHealth?.[0]?.modelUsed ?? summary?.modelHealth?.[0]?.lastAudited ?? 'Never')} Icon={Cpu} color={C.violet} />
       </div>
+
+      {/* Quota Status Bar */}
+      <QuotaBar quota={quota} />
 
       {/* Trend Chart + Score Ring */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16 }}>
@@ -463,7 +534,7 @@ export default function Dashboard() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,.05)' }}>
-                {['Icon', 'Domain', 'Fairness Score', 'Industry', 'Flags', 'Engine', 'Scanned'].map(h => (
+                {['Icon', 'Domain', 'Fairness Score', 'Industry', 'Flags', 'Pages', 'Confidence', 'Engine', 'Scanned'].map(h => (
                   <th key={h} style={{ paddingBottom: 10, textAlign: 'left', fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>{h}</th>
                 ))}
               </tr>
@@ -500,7 +571,17 @@ export default function Dashboard() {
                     </span>
                   </td>
                   <td style={{ paddingRight: 16 }}>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{h.modelUsed?.split('-')[0] || 'Gemini'}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace' }}>
+                      {h.pagesAnalyzed ?? '—'}
+                    </span>
+                  </td>
+                  <td style={{ paddingRight: 16 }}>
+                    <ConfidenceBadge level={h.confidence} />
+                  </td>
+                  <td style={{ paddingRight: 16 }}>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace' }}>
+                      {h.modelUsed ? h.modelUsed.replace('gemini-', 'g-') : 'Gemini'}
+                    </span>
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
