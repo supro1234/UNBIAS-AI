@@ -14,7 +14,6 @@ services:
   - type: web
     name: unbiased-ai-frontend
     env: static
-    region: oregon
     plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: dist
