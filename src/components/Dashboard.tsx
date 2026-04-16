@@ -5,8 +5,8 @@ import {
   BarChart, Bar, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import {
-  ShieldCheck, AlertTriangle, Cpu, ShieldAlert,
-  CheckCircle, X, Activity, RefreshCw, Zap, Globe, Clock, TrendingUp, Database,
+  ShieldCheck, AlertTriangle, Cpu,
+  X, Activity, RefreshCw, Zap, Globe, Clock, TrendingUp, Database,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ function Toast({ msg, type, close }: ToastProps) {
     return () => clearTimeout(t);
   }, [close]);
 
-  const clr = type === 'error' ? C.red : type === 'success' ? C.green : C.cyan;
+  const clr = type === 'error' ? C.red : type === 'success' ? C.green : C.violet;
   return (
     <div style={{
       position: 'fixed', top: 20, right: 20, zIndex: 9999, padding: '14px 18px',
@@ -133,8 +133,7 @@ interface StatProps {
 
 function Stat({ title, value, sub, Icon, color }: StatProps) {
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+    <div className="glass-violet" style={{
       borderRadius: 18, padding: '20px 22px', display: 'flex', gap: 16, alignItems: 'flex-start',
     }}>
       <div style={{
@@ -257,12 +256,11 @@ function QuotaBar({ quota }: { quota: QuotaStatus | null }) {
   const pct = Math.min(100, (quota.requestsThisMinute / 10) * 100);
   const barColor = quota.withinLimits ? C.green : C.red;
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+    <div className="glass-violet" style={{
       borderRadius: 14, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 20,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <Database size={14} style={{ color: C.cyan }} />
+        <Database size={14} style={{ color: C.violet }} />
         <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '.08em' }}>API Quota</span>
       </div>
       <div style={{ flex: 1 }}>
@@ -279,7 +277,7 @@ function QuotaBar({ quota }: { quota: QuotaStatus | null }) {
         </div>
       </div>
       <div style={{ flexShrink: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)', maxWidth: 180, textAlign: 'right' }}>
-        Model: <span style={{ color: C.cyan, fontFamily: 'monospace' }}>{quota.primaryModel}</span>
+        Model: <span style={{ color: C.violet, fontFamily: 'monospace' }}>{quota.primaryModel}</span>
       </div>
     </div>
   );
@@ -292,13 +290,13 @@ export default function Dashboard() {
   const [history, setHistory]       = useState<ScanHistoryEntry[]>([]);
   const [loading, setLoading]       = useState(true);
   const [mitigating, setMitigating] = useState<string | null>(null);
-  const [halted, setHalted]         = useState(false);
   const [toast, setToast]           = useState<{ msg: string; type: string } | null>(null);
   const [quota, setQuota]           = useState<QuotaStatus | null>(null);
 
   const notify = (msg: string, type = 'info') => setToast({ msg, type });
 
   const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
       const [sumR, histR, quotaR] = await Promise.all([
         fetch('http://localhost:3001/api/summary'),
@@ -311,6 +309,7 @@ export default function Dashboard() {
       if (sumD.success)  setSummary(sumD);
       if (histD.success) setHistory(histD.history);
       setQuota(quotaD);
+      notify('Dashboard synced successfully', 'success');
     } catch {
       notify('Backend unavailable — showing cached data', 'error');
     } finally {
@@ -362,7 +361,7 @@ export default function Dashboard() {
 
   const scoreDistData: ScoreDistEntry[] = [
     { range: '90-100', count: history.filter(h => h.overallBiasScore >= 90).length,                                    color: C.green  },
-    { range: '80-89',  count: history.filter(h => h.overallBiasScore >= 80 && h.overallBiasScore < 90).length,        color: C.cyan   },
+    { range: '80-89',  count: history.filter(h => h.overallBiasScore >= 80 && h.overallBiasScore < 90).length,        color: C.violet   },
     { range: '60-79',  count: history.filter(h => h.overallBiasScore >= 60 && h.overallBiasScore < 80).length,        color: C.yellow },
     { range: '0-59',   count: history.filter(h => h.overallBiasScore < 60).length,                                    color: C.red    },
   ];
@@ -385,22 +384,10 @@ export default function Dashboard() {
 
       {/* Top action bar */}
       <div style={{ position: 'absolute', top: 12, right: 28, zIndex: 100, display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={fetchData}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontSize: 12, fontWeight: 700, color: C.cyan, cursor: 'pointer' }}>
-          <RefreshCw size={13} />
+        <button onClick={fetchData} disabled={loading}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontSize: 12, fontWeight: 700, color: C.violet, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
+          <RefreshCw size={13} className={loading ? 'spin' : ''} />
           Refresh
-        </button>
-        <button onClick={() => { const n = !halted; setHalted(n); notify(n ? 'All pipelines halted.' : 'Pipelines resumed.', n ? 'error' : 'success'); }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10,
-            fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer',
-            background: halted ? 'rgba(32,201,151,.1)' : 'rgba(220,53,69,.1)',
-            color: halted ? C.green : C.red,
-            outline: `1px solid ${halted ? 'rgba(32,201,151,.25)' : 'rgba(220,53,69,.25)'}`,
-            transition: 'all .25s',
-          }}>
-          {halted ? <CheckCircle size={13} /> : <ShieldAlert size={13} />}
-          {halted ? 'Resume Pipeline' : 'Halt Pipeline'}
         </button>
       </div>
 
@@ -408,10 +395,10 @@ export default function Dashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>
         <Stat title="Avg Fairness Score" value={loading ? '—' : `${score}%`}
           sub="Across all scanned URLs" Icon={ShieldCheck} color={C.green} />
-        <Stat title="URLs Scanned" value={loading ? '—' : halted ? '0' : `${history.length}`}
-          sub={halted ? 'Pipeline suspended' : 'Lifetime crawls'} Icon={Globe} color={C.cyan} />
-        <Stat title="Active Flags" value={loading ? '—' : halted ? '0' : `${summary?.criticalFlags ?? 0}`}
-          sub={halted ? 'Suspended' : 'Disparate impact flags'} Icon={AlertTriangle} color={C.red} />
+        <Stat title="URLs Scanned" value={loading ? '—' : `${history.length}`}
+          sub="Lifetime crawls" Icon={Globe} color={C.violet} />
+        <Stat title="Active Flags" value={loading ? '—' : `${summary?.criticalFlags ?? 0}`}
+          sub="Disparate impact flags" Icon={AlertTriangle} color={C.red} />
         <Stat title="Engine" value="Gemini"
           sub={loading ? '—' : (summary?.modelHealth?.[0]?.modelUsed ?? summary?.modelHealth?.[0]?.lastAudited ?? 'Never')} Icon={Cpu} color={C.violet} />
       </div>
@@ -421,7 +408,7 @@ export default function Dashboard() {
 
       {/* Trend Chart + Score Ring */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16 }}>
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 18, padding: '22px 24px' }}>
+        <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 3 }}>
@@ -434,34 +421,36 @@ export default function Dashboard() {
               </div>
             </div>
             {history.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: C.cyan }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: C.violet }}>
                 <TrendingUp size={13} />
                 Live Data
               </div>
             )}
           </div>
-          <div style={{ height: 220 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData} margin={{ top: 5, right: 0, bottom: 0, left: -10 }}>
-                <defs>
-                  <linearGradient id="gF" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%"   stopColor={C.cyan} stopOpacity={0.3} />
-                    <stop offset="100%" stopColor={C.cyan} stopOpacity={0}   />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="m" stroke="rgba(255,255,255,0.2)"
-                  tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.35)' }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 100]} stroke="rgba(255,255,255,0.2)"
-                  tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.35)' }} axisLine={false} tickLine={false} />
-                <Tooltip content={<ChartTip />} cursor={{ stroke: 'rgba(255,255,255,.06)' }} />
-                <Area dataKey="f" name="Fairness" stroke={C.cyan} strokeWidth={2.5} fill="url(#gF)"
-                  dot={{ r: 4, fill: C.cyan, strokeWidth: 0 }} activeDot={{ r: 6 }} />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
+            <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 220 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData} margin={{ top: 5, right: 0, bottom: 0, left: -10 }}>
+                  <defs>
+                    <linearGradient id="gF" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor={C.violet} stopOpacity={0.3} />
+                      <stop offset="100%" stopColor={C.violet} stopOpacity={0}   />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="m" stroke="rgba(255,255,255,0.2)"
+                    tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.35)' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} stroke="rgba(255,255,255,0.2)"
+                    tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.35)' }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<ChartTip />} cursor={{ stroke: 'rgba(255,255,255,.06)' }} />
+                  <Area dataKey="f" name="Fairness" stroke={C.violet} strokeWidth={2.5} fill="url(#gF)"
+                    dot={{ r: 4, fill: C.violet, strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 18, padding: '22px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,0.35)', alignSelf: 'flex-start' }}>
             Overall Score
           </div>
@@ -481,11 +470,12 @@ export default function Dashboard() {
 
       {/* Score Distribution + Radar */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 18, padding: '22px 24px' }}>
+        <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Score Distribution</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Fairness score breakdown across all scanned URLs</div>
-          <div style={{ height: 180 }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
+            <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 180 }}>
+              <ResponsiveContainer width="100%" height="100%">
               <BarChart data={scoreDistData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
                 <XAxis dataKey="range" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.3)' }} axisLine={false} tickLine={false} />
@@ -495,26 +485,29 @@ export default function Dashboard() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 18, padding: '22px 24px' }}>
+        <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Audit Depth Radar</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 16 }}>Multi-dimension audit coverage quality</div>
-          <div style={{ height: 200 }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
+            <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 200 }}>
+              <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
                 <PolarGrid stroke="rgba(255,255,255,0.06)" />
                 <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }} />
                 <Radar dataKey="A" stroke={C.violet} fill={C.violet} fillOpacity={0.12} strokeWidth={2} dot={{ r: 3, fill: C.violet }} />
               </RadarChart>
             </ResponsiveContainer>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Recent Scans Table */}
-      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 18, padding: '22px 24px' }}>
+      <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.8)', marginBottom: 3 }}>Recently Scanned URLs</div>
@@ -597,7 +590,7 @@ export default function Dashboard() {
       </div>
 
       {/* Engine Health */}
-      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 18, padding: '22px 24px' }}>
+      <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Engine Health</div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>Live fairness engine status — click Fix to apply mitigation</div>
         {loading ? (

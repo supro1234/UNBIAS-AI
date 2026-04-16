@@ -85,9 +85,9 @@ const sphereFragmentShader = `
     vec3 viewDir  = normalize(cameraPosition - vPosition);
     float fresnel = pow(1. - dot(vNormal, viewDir), 3.5);
 
-    vec3 colA = vec3(0.01, 0.28, 0.55);
-    vec3 colB = vec3(0.02, 0.45, 0.42);
-    vec3 colC = vec3(0.18, 0.05, 0.42);
+    vec3 colA = vec3(0.10, 0.05, 0.35);
+    vec3 colB = vec3(0.35, 0.15, 0.65);
+    vec3 colC = vec3(0.55, 0.30, 0.85);
 
     float band  = sin(vPosition.y * 5. + uTime * 0.9) * 0.5 + 0.5;
     float pulse = sin(uTime * 0.6 + vDisplace*8.) * 0.5 + 0.5;
@@ -135,8 +135,7 @@ const ringFragmentShader = `
     vec2  c = 2.*gl_PointCoord - 1.;
     float r = dot(c,c);
     if(r > 1.) discard;
-    float a = exp(-r*5.) * vAlpha;
-    gl_FragColor = vec4(0.05, 0.55, 0.75, a * 0.6);
+    gl_FragColor = vec4(0.45, 0.15, 0.85, a * 0.7);
   }
 `;
 
@@ -171,7 +170,7 @@ const fieldFragShader = `
 // ═══════════════════════════════════════════════════════════════
 
 // Orbit ring particles
-const RING_N = 700;
+const RING_N = 1800;
 const RING_DATA = (() => {
   const angles = new Float32Array(RING_N);
   const radii  = new Float32Array(RING_N);
@@ -180,10 +179,9 @@ const RING_DATA = (() => {
   const ys     = new Float32Array(RING_N);
   const pos    = new Float32Array(RING_N * 3);
   for (let i = 0; i < RING_N; i++) {
-    angles[i] = Math.random() * Math.PI * 2;
-    const ring = Math.floor(Math.random() * 3);
-    radii[i]   = 7.2 + ring * 1.4 + Math.random() * 0.5;
-    speeds[i]  = (0.05 + Math.random() * 0.1) * (Math.random() > 0.5 ? 1 : -1);
+    const ring = Math.floor(Math.random() * 4);
+    radii[i]   = 7.0 + ring * 1.6 + Math.random() * 0.5;
+    speeds[i]  = (0.04 + Math.random() * 0.15) * (Math.random() > 0.5 ? 1 : -1);
     sizes[i]   = Math.random() * 1.2 + 0.3;
     ys[i]      = (Math.random() - 0.5) * 0.3;
     pos[i*3]   = 0;
@@ -194,15 +192,15 @@ const RING_DATA = (() => {
 })();
 
 // Deep field particles
-const FIELD_N = 5000;
+const FIELD_N = 12000;
 const FIELD_DATA = (() => {
   const positions = new Float32Array(FIELD_N * 3);
   const colors    = new Float32Array(FIELD_N * 3);
   const sizes     = new Float32Array(FIELD_N);
   const offs      = new Float32Array(FIELD_N);
   const palette   = [
-    new THREE.Color('#0a4ebd'), new THREE.Color('#0990b0'),
-    new THREE.Color('#4a2891'), new THREE.Color('#0f7a60'),
+    new THREE.Color('#8B5CF6'), new THREE.Color('#C084FC'),
+    new THREE.Color('#4a2891'), new THREE.Color('#2e1065'),
   ];
   for (let i = 0; i < FIELD_N; i++) {
     const r   = 20 + Math.pow(Math.random(), 0.4) * 60;

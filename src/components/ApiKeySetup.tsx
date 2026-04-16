@@ -52,11 +52,11 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
         background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)'
       }}>
         <div style={{
-          width: 64, height: 64, borderRadius: 16, background: 'rgba(66,133,244,0.1)',
+          width: 64, height: 64, borderRadius: 16, background: 'rgba(139,92,246,0.1)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px',
-          border: '1px solid rgba(66,133,244,0.2)'
+          border: '1px solid rgba(139,92,246,0.2)'
         }}>
-          <Key size={32} color="#4285F4" />
+          <Key size={32} color="#8B5CF6" />
         </div>
 
         <h2 style={{ fontSize: 24, fontWeight: 900, color: '#fff', marginBottom: 8 }}>AI Security Setup</h2>
@@ -65,9 +65,36 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
         </p>
 
         <div style={{ textAlign: 'left', marginBottom: 24 }}>
-          <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>
-            Google Gemini API Key
-          </label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Google Gemini API Key
+            </label>
+            <a 
+              href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer" 
+              style={{ 
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '4px 10px', borderRadius: 8,
+                background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)',
+                fontSize: 10, color: '#C084FC', textDecoration: 'none', fontWeight: 800,
+                letterSpacing: '0.05em', textTransform: 'uppercase',
+                boxShadow: '0 0 10px rgba(139,92,246,0.1)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(139,92,246,0.2)';
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(139,92,246,0.4)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(139,92,246,0.1)';
+                e.currentTarget.style.boxShadow = '0 0 10px rgba(139,92,246,0.1)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#C084FC', animation: 'pulse 1.5s infinite alternate', boxShadow: '0 0 8px #C084FC' }} />
+              Get an API Key
+            </a>
+          </div>
           <div style={{ position: 'relative' }}>
             <input
               type="password"
@@ -80,7 +107,7 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
                 color: '#fff', fontSize: 14, outline: 'none', transition: 'border-color 0.2s',
                 fontFamily: 'monospace'
               }}
-              onFocus={(e) => e.target.style.borderColor = 'rgba(66,133,244,0.4)'}
+              onFocus={(e) => e.target.style.borderColor = 'rgba(139,92,246,0.4)'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
             />
             <Lock size={16} color="rgba(255,255,255,0.3)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
@@ -100,7 +127,7 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
             Back
           </button>
           <button onClick={validate} disabled={validating || !apiKey} style={{
-            flex: 2, padding: '14px', borderRadius: 12, background: '#4285F4',
+            flex: 2, padding: '14px', borderRadius: 12, background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
             color: '#fff', fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             opacity: (validating || !apiKey) ? 0.6 : 1, transition: 'all 0.2s'

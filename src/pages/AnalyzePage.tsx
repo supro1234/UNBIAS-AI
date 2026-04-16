@@ -386,10 +386,11 @@ export default function AnalyzePage({ apiKey }: Props) {
             onKeyDown={e => e.key === 'Enter' && runLiveAudit()}
             placeholder="https://target-website.com — press Enter or click Audit"
             disabled={running}
+            className="focus:ring-2 focus:ring-blue-400 transition-all border-transparent focus:border-blue-400"
             style={{
               width: '100%', padding: '16px 18px 16px 52px', borderRadius: 14,
               background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)',
-              color: '#fff', fontSize: 15, outline: 'none', transition: 'all 0.25s',
+              color: '#fff', fontSize: 15, outline: 'none',
               fontFamily: 'monospace', boxSizing: 'border-box',
             }}
           />
@@ -397,12 +398,12 @@ export default function AnalyzePage({ apiKey }: Props) {
         <button
           id="start-audit-btn"
           onClick={runLiveAudit} disabled={running || !url}
+          className="glass-primary group transition-all active:scale-95 focus:ring-2 focus:ring-blue-400"
           style={{
             display: 'flex', alignItems: 'center', gap: 10, padding: '16px 36px', borderRadius: 14,
             background: running ? 'rgba(10,110,253,0.2)' : `linear-gradient(135deg, ${C.blue}, ${C.violet})`,
-            color: '#fff', border: 'none', fontSize: 14, fontWeight: 800, cursor: 'pointer',
-            boxShadow: running ? 'none' : '0 8px 32px rgba(10,110,253,0.4)',
-            opacity: (running || !url) ? 0.6 : 1, transition: 'all 0.3s', flexShrink: 0,
+            color: '#fff', cursor: 'pointer', fontSize: 14, fontWeight: 800,
+            opacity: (running || !url) ? 0.6 : 1, flexShrink: 0,
           }}
         >
           {running ? <RefreshCw size={18} className="spin" /> : <Play size={18} />}
@@ -437,8 +438,7 @@ export default function AnalyzePage({ apiKey }: Props) {
               { label: 'Bias Flags',     value: String(di.filter(r => r.disparateImpactFlag).length), sub: 'Disparate impact',   Icon: AlertTriangle, color: C.yellow },
               { label: 'Analysis Time',  value: `${(((elapsed ?? 0)) / 1000).toFixed(1)}s`,        sub: 'Full pipeline',      Icon: Activity,      color: C.violet },
             ] as const).map(({ label, value, sub, Icon, color }) => (
-              <div key={label} style={{
-                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+              <div key={label} className="glass-primary" style={{
                 borderRadius: 16, padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14,
               }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}14`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -510,7 +510,7 @@ export default function AnalyzePage({ apiKey }: Props) {
               )}
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <div className="glass-primary" style={{ borderRadius: 18, padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'rgba(255,255,255,0.4)' }}>
                 Overall Score
               </div>
@@ -538,7 +538,7 @@ export default function AnalyzePage({ apiKey }: Props) {
 
           {/* Verification Screenshot */}
           {results.screenshot && (
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, overflow: 'hidden', position: 'relative' }}>
+            <div className="glass-primary" style={{ borderRadius: 18, overflow: 'hidden', position: 'relative' }}>
               <div style={{ position: 'absolute', top: 12, left: 14, zIndex: 10 }}>
                 <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.7)', color: C.cyan, border: '1px solid rgba(13,202,240,0.3)' }}>
                   Rendered Proof — {(() => { try { return new URL(url).hostname; } catch { return url; } })()}
@@ -554,41 +554,45 @@ export default function AnalyzePage({ apiKey }: Props) {
 
           {/* Charts: Radar + Scatter */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '20px 24px' }}>
+            <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.08em' }}>Fairness Radar</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Multi-dimension bias overview</div>
-              <div style={{ height: 230 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData}>
-                    <PolarGrid stroke="rgba(255,255,255,0.06)" />
-                    <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.5)' }} />
-                    <Radar dataKey="A" stroke={C.cyan} fill={C.cyan} fillOpacity={0.12} strokeWidth={2} dot={{ r: 4, fill: C.cyan }} />
-                  </RadarChart>
-                </ResponsiveContainer>
+              <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
+                <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 230 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={radarData}>
+                      <PolarGrid stroke="rgba(255,255,255,0.06)" />
+                      <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.5)' }} />
+                      <Radar dataKey="A" stroke={C.cyan} fill={C.cyan} fillOpacity={0.12} strokeWidth={2} dot={{ r: 4, fill: C.cyan }} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '20px 24px' }}>
+            <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.08em' }}>4/5ths Rule Scatter</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Acceptance Rate vs Impact Ratio per group</div>
-              <div style={{ height: 230 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart margin={{ top: 10, right: 10, bottom: 0, left: -10 }}>
-                    <XAxis type="number" dataKey="x" name="Acceptance %" domain={[0, 100]}
-                      tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }}
-                      label={{ value: 'Acceptance %', position: 'insideBottom', offset: -2, fill: 'rgba(255,255,255,0.3)', fontSize: 10 }}
-                    />
-                    <YAxis type="number" dataKey="y" name="Impact Ratio %" domain={[0, 120]}
-                      tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }}
-                    />
-                    <ZAxis type="number" dataKey="z" range={[40, 200]} />
-                    <Tooltip content={<CustomTip extra="%" />} cursor={{ stroke: 'rgba(255,255,255,0.05)' }} />
-                    <ReferenceLine y={80} stroke={C.red} strokeDasharray="4 4" strokeWidth={1.5}
-                      label={{ value: '80% threshold', fill: C.red, fontSize: 9 }}
-                    />
-                    <Scatter data={scatterData} shape={<ScatterDot />} />
-                  </ScatterChart>
-                </ResponsiveContainer>
+              <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
+                <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 230 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ScatterChart margin={{ top: 10, right: 10, bottom: 0, left: -10 }}>
+                      <XAxis type="number" dataKey="x" name="Acceptance %" domain={[0, 100]}
+                        tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }}
+                        label={{ value: 'Acceptance %', position: 'insideBottom', offset: -2, fill: 'rgba(255,255,255,0.3)', fontSize: 10 }}
+                      />
+                      <YAxis type="number" dataKey="y" name="Impact Ratio %" domain={[0, 120]}
+                        tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.4)' }}
+                      />
+                      <ZAxis type="number" dataKey="z" range={[40, 200]} />
+                      <Tooltip content={<CustomTip extra="%" />} cursor={{ stroke: 'rgba(255,255,255,0.05)' }} />
+                      <ReferenceLine y={80} stroke={C.red} strokeDasharray="4 4" strokeWidth={1.5}
+                        label={{ value: '80% threshold', fill: C.red, fontSize: 9 }}
+                      />
+                      <Scatter data={scatterData} shape={<ScatterDot />} />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           </div>
@@ -597,7 +601,7 @@ export default function AnalyzePage({ apiKey }: Props) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
 
             {/* 1. Disparate Impact */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '20px 24px' }}>
+            <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '.08em' }}>Disparate Impact</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
@@ -621,28 +625,30 @@ export default function AnalyzePage({ apiKey }: Props) {
             </div>
 
             {/* 2. Feature Correlation Bar Chart */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '20px 24px' }}>
+            <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.08em' }}>Bias Proxy Detection</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Feature correlation with protected attributes</div>
-              <div style={{ height: 200 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={fcChart} layout="vertical">
-                    <XAxis type="number" domain={[0, 100]} hide />
-                    <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.5)' }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                      content={<FeatureCorrelationTooltip />}
-                    />
-                    <Bar dataKey="val" radius={[0, 5, 5, 0]} background={{ fill: 'rgba(255,255,255,0.025)', radius: 5 }}>
-                      {fcChart.map((e, cellIdx) => <Cell key={cellIdx} fill={e.color} />)}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
+                <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 200 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={fcChart} layout="vertical">
+                      <XAxis type="number" domain={[0, 100]} hide />
+                      <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.5)' }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                        content={<FeatureCorrelationTooltip />}
+                      />
+                      <Bar dataKey="val" radius={[0, 5, 5, 0]} background={{ fill: 'rgba(255,255,255,0.025)', radius: 5 }}>
+                        {fcChart.map((e, cellIdx) => <Cell key={cellIdx} fill={e.color} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
             {/* 3. Equal Opportunity */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '20px 24px' }}>
+            <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '.08em' }}>Equal Opportunity Gap</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {eo.map((r, idx) => (
@@ -661,7 +667,7 @@ export default function AnalyzePage({ apiKey }: Props) {
             </div>
 
             {/* 4. Statistical Parity */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '20px 24px' }}>
+            <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '.08em' }}>Statistical Parity</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {sp.map((r, idx) => (

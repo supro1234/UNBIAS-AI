@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import NetworkBackground from './components/NetworkBackground';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -39,23 +40,31 @@ export default function App() {
       {/* Persistant 3D/4D Background */}
       <NetworkBackground />
 
-      {step === 'welcome' && (
-        <WelcomeScreen onStart={handleStart} />
-      )}
+      <AnimatePresence mode="wait">
+        {step === 'welcome' && (
+          <WelcomeScreen key="welcome" onStart={handleStart} />
+        )}
 
-      {step === 'setup' && (
-        <ApiKeySetup onSuccess={handleKeySuccess} onBack={handleBack} />
-      )}
+        {step === 'setup' && (
+          <ApiKeySetup key="setup" onSuccess={handleKeySuccess} onBack={handleBack} />
+        )}
 
-      {step === 'app' && (
-        <div className="fade-up" style={{ display: 'flex', minHeight: '100vh' }}>
-          <Sidebar active={active} onNav={setActive} apiKeyStatus={!!apiKey} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {/* We pass the apiKey to pages that need it, like AnalyzePage */}
-            <Page apiKey={apiKey} />
-          </div>
-        </div>
-      )}
+        {step === 'app' && (
+          <motion.div 
+            key="app" 
+            initial={{ opacity: 0, y: 30, scale: 0.98 }} 
+            animate={{ opacity: 1, y: 0, scale: 1 }} 
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            style={{ display: 'flex', minHeight: '100vh', width: '100%' }}
+          >
+            <Sidebar active={active} onNav={setActive} apiKeyStatus={!!apiKey} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {/* We pass the apiKey to pages that need it, like AnalyzePage */}
+              <Page apiKey={apiKey} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
