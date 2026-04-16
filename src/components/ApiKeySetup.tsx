@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Key, Lock, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
@@ -12,8 +12,18 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const validate = async () => {
-    if (!apiKey || apiKey.length < 20) {
+  useEffect(() => {
+    if (apiKey && apiKey.length >= 30 && !validating) {
+      const timer = setTimeout(() => {
+        validateKey(apiKey);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey]);
+
+  const validateKey = async (keyToValidate: string) => {
+    if (!keyToValidate || keyToValidate.length < 20) {
       setError('Please enter a valid Google Gemini API Key');
       return;
     }
@@ -26,7 +36,7 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
       const res = await fetch(`${API_BASE_URL}/api/validate-key`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey })
+        body: JSON.stringify({ apiKey: keyToValidate })
       });
       const data = await res.json();
       
@@ -122,7 +132,7 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <button
-            onClick={validate}
+            onClick={() => validateKey(apiKey)}
             disabled={validating || !apiKey}
             style={{
               width: '100%', padding: '14px', borderRadius: 12,
