@@ -138,30 +138,40 @@ This runs:
 
 ## 📁 Project Structure
 
-```
+```text
 unbiased-ai/
 ├── server/
-│   └── index.js              # Express backend — crawler + Gemini API
+│   └── index.js                 # Express backend — Web Crawler + Gemini API
 ├── src/
 │   ├── components/
-│   │   ├── NetworkBackground  # 3D WebGL cyber sphere (GLSL shaders)
-│   │   ├── Dashboard          # Live scan history charts (Recharts)
-│   │   ├── Layout             # Page layout wrapper
-│   │   ├── Sidebar            # Navigation sidebar
-│   │   ├── WelcomeScreen      # Animated landing page
-│   │   └── ApiKeySetup        # Secure key input
+│   │   ├── ApiKeySetup.tsx      # Secure Gemini key input
+│   │   ├── Dashboard.tsx        # Live fairness stats & charts (Recharts)
+│   │   ├── ErrorBoundary.tsx    # Global crash fallback UI (+ tests)
+│   │   ├── Layout.tsx           # Application frame wrapper
+│   │   ├── NetworkBackground.tsx# 3D WebGL cyber sphere (GLSL shaders)
+│   │   ├── Sidebar.tsx          # Navigational sidebar
+│   │   ├── Toast.tsx            # Asynchronous notification popup (+ tests)
+│   │   └── WelcomeScreen.tsx    # Animated landing page
+│   ├── data/
+│   │   └── mockData.ts          # Default URL audit scenarios
 │   ├── pages/
-│   │   ├── AnalyzePage        # URL input + full audit visualization
-│   │   ├── DatasetsPage       # Pre-loaded audit scenarios (8 real URLs)
-│   │   ├── ModelsPage         # Gemini engine documentation
-│   │   └── ReportsPage        # Scan history + DOCX download
+│   │   ├── AnalyzePage.tsx      # Deep crawl URL auditor & analysis UI
+│   │   ├── DatasetsPage.tsx     # Pre-loaded scenarios list
+│   │   ├── ModelsPage.tsx       # Gemini engine fallback pipeline doc
+│   │   ├── ReportsPage.tsx      # Scan history & DOCX export table
+│   │   └── UpcomingFeaturesPage.tsx # Platform expansion roadmap
 │   ├── utils/
-│   │   └── generateReport.ts  # Client-side DOCX report generation
-│   ├── App.tsx                # Root router
-│   └── index.css              # Global styles + animations
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
+│   │   └── generateReport.ts    # Client-side native DOCX generation
+│   ├── App.tsx                  # Root React configuration & global router
+│   ├── config.ts                # Environment maps (`VITE_API_BASE_URL`)
+│   ├── main.tsx                 # Entrypoint
+│   └── index.css                # Style tokens, glassmorphism UI & animations
+├── Dockerfile                   # Containerized backend (injects Puppeteer Chrome)
+├── eslint.config.js             # Strict linting rulesets
+├── package.json                 # NPM dependencies & task runners (`npm run dev`)
+├── render.yaml                  # Unified Blueprint (Server + Static UI deployment)
+├── tsconfig.*.json              # Strict TypeScript mapping (App, Node, Core)
+└── vite.config.ts               # Vite build tools & Vitest test runner setup
 ```
 
 ---
