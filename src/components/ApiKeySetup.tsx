@@ -48,16 +48,16 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'rgba(3,3,5,0.4)', backdropFilter: 'blur(12px)'
     }}>
-      <div className="card-3d fade-up" style={{
+      <div className="card-3d glass-violet fade-up" style={{
         maxWidth: 500, width: '90%', padding: '40px', textAlign: 'center',
-        background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)'
       }}>
-        <div style={{
+        <div className="float" style={{
           width: 64, height: 64, borderRadius: 16, background: 'rgba(139,92,246,0.1)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px',
-          border: '1px solid rgba(139,92,246,0.2)'
+          border: '1px solid rgba(139,92,246,0.2)',
+          boxShadow: '0 0 40px rgba(139,92,246,0.15)'
         }}>
-          <Key size={32} color="#8B5CF6" />
+          <Key size={32} color="#C084FC" />
         </div>
 
         <h2 style={{ fontSize: 24, fontWeight: 900, color: '#fff', marginBottom: 8 }}>AI Security Setup</h2>
@@ -120,21 +120,28 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <button
+            onClick={validate}
+            disabled={validating || !apiKey}
+            style={{
+              width: '100%', padding: '14px', borderRadius: 12,
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(167,139,250,0.15))',
+              border: '1px solid rgba(139,92,246,0.3)',
+              color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer',
+              display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8,
+              opacity: validating || !apiKey ? 0.6 : 1, transition: 'all .2s'
+            }}
+          >
+            {validating ? <Loader2 size={16} className="spin" /> : <ShieldCheck size={16} />}
+            {validating ? 'Verifying Key...' : 'Validate and continue'}
+          </button>
           <button onClick={onBack} style={{
-            flex: 1, padding: '14px', borderRadius: 12, background: 'rgba(255,255,255,0.05)',
-            color: '#fff', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer'
+            width: '100%', padding: '14px', borderRadius: 12, background: 'rgba(255,255,255,0.05)',
+            color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer',
+            transition: 'all 0.2s'
           }}>
             Back
-          </button>
-          <button onClick={validate} disabled={validating || !apiKey} style={{
-            flex: 2, padding: '14px', borderRadius: 12, background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
-            color: '#fff', fontSize: 14, fontWeight: 800, border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-            opacity: (validating || !apiKey) ? 0.6 : 1, transition: 'all 0.2s'
-          }}>
-            {validating ? <Loader2 size={18} className="spin" /> : <ShieldCheck size={18} />}
-            {validating ? 'Verifying Key...' : 'Validate & Enter'}
           </button>
         </div>
 

@@ -134,7 +134,7 @@ interface StatProps {
 
 function Stat({ title, value, sub, Icon, color }: StatProps) {
   return (
-    <div className="glass-violet" style={{
+    <div className="glass-violet glow-hover" style={{
       borderRadius: 18, padding: '20px 22px', display: 'flex', gap: 16, alignItems: 'flex-start',
     }}>
       <div style={{
@@ -429,7 +429,7 @@ export default function Dashboard() {
             )}
           </div>
           <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-            <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 220 }}>
+            <div className={loading ? "skeleton" : ""} style={{ height: 220, background: 'rgba(0,0,0,0.45)', borderRadius: 12, padding: 16, border: '1px solid rgba(139,92,246,0.15)' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trendData} margin={{ top: 5, right: 0, bottom: 0, left: -10 }}>
                   <defs>
@@ -475,7 +475,7 @@ export default function Dashboard() {
           <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Score Distribution</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Fairness score breakdown across all scanned URLs</div>
           <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-            <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 180 }}>
+            <div className={loading ? "skeleton" : ""} style={{ height: 180, background: 'rgba(0,0,0,0.45)', borderRadius: 12, padding: 16, border: '1px solid rgba(139,92,246,0.15)' }}>
               <ResponsiveContainer width="100%" height="100%">
               <BarChart data={scoreDistData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
                 <XAxis dataKey="range" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
@@ -493,8 +493,8 @@ export default function Dashboard() {
         <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Audit Depth Radar</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 16 }}>Multi-dimension audit coverage quality</div>
-          <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-            <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 200 }}>
+          <div className="glass-secondary p-4" style={{ borderRadius: 18, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div className={loading ? "skeleton" : ""} style={{ flex: 1, minHeight: 200, background: 'rgba(6,6,10,1)', borderRadius: 12, padding: 16, border: '1px solid rgba(139,92,246,0.15)' }}>
               <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
                 <PolarGrid stroke="rgba(255,255,255,0.06)" />

@@ -9,6 +9,7 @@ import ModelsPage from './pages/ModelsPage';
 import ReportsPage from './pages/ReportsPage';
 import WelcomeScreen from './components/WelcomeScreen';
 import ApiKeySetup from './components/ApiKeySetup';
+import UpcomingFeaturesPage from './pages/UpcomingFeaturesPage';
 
 const pages: Record<string, React.FC<any>> = {
   dashboard: Dashboard,
@@ -16,6 +17,7 @@ const pages: Record<string, React.FC<any>> = {
   datasets:  DatasetsPage,
   models:    ModelsPage,
   reports:   ReportsPage,
+  features:  UpcomingFeaturesPage,
 };
 
 export default function App() {

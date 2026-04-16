@@ -1,4 +1,4 @@
-import { LayoutDashboard, Database, Cpu, FileWarning, Activity, Hexagon } from 'lucide-react';
+import { LayoutDashboard, Database, Cpu, FileWarning, Activity, Hexagon, Sparkles } from 'lucide-react';
 
 const nav = [
   { id:'dashboard', icon:LayoutDashboard, label:'Overview' },
@@ -6,6 +6,7 @@ const nav = [
   { id:'datasets',  icon:Database,        label:'Datasets' },
   { id:'models',    icon:Cpu,             label:'Models' },
   { id:'reports',   icon:FileWarning,     label:'Reports' },
+  { id:'features',  icon:Sparkles,          label:'Upcoming' },
 ];
 
 interface Props { active:string; onNav:(p:string)=>void; apiKeyStatus: boolean; }
@@ -24,17 +25,17 @@ export default function Sidebar({ active, onNav, apiKeyStatus }: Props) {
       <div style={{ padding:'22px 18px 18px', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <div style={{ position:'relative', flexShrink:0 }}>
-            <Hexagon size={26} color="#4285F4" strokeWidth={1.5}/>
+            <Hexagon size={26} color="#C084FC" strokeWidth={1.5}/>
             <div style={{
               position:'absolute', inset:0,
               display:'flex', alignItems:'center', justifyContent:'center',
             }}>
-              <div style={{ width:6, height:6, borderRadius:'50%', background:'#4285F4', boxShadow:'0 0 8px #4285F4' }}/>
+              <div style={{ width:6, height:6, borderRadius:'50%', background:'#C084FC', boxShadow:'0 0 8px #C084FC' }}/>
             </div>
           </div>
           <div className="sidebar-text-content">
             <div style={{ fontWeight:800, fontSize:14, letterSpacing:'-.01em', color:'#fff' }}>UnbiasNet</div>
-            <div style={{ fontSize:9, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#4285F4', marginTop:1 }}>AI Fairness Platform</div>
+            <div style={{ fontSize:9, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#C084FC', marginTop:1 }}>AI Platform</div>
           </div>
         </div>
       </div>
@@ -44,7 +45,7 @@ export default function Sidebar({ active, onNav, apiKeyStatus }: Props) {
         {nav.map(({ id, icon:Icon, label }) => (
           <button key={id} className={`nav-item ${active===id?' active':''}`} onClick={() => onNav(id)}>
             <Icon size={16} strokeWidth={active===id?2.2:1.8}
-              style={{ color: active===id?'#4285F4':'inherit', flexShrink:0 }}/>
+              style={{ color: active===id?'#C084FC':'inherit', flexShrink:0 }}/>
             <span className="sidebar-text-content">{label}</span>
           </button>
         ))}

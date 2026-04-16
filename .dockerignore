@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+.git
+.env
+.vscode
+public
+src
+index.html
+vite.config.ts
+tsconfig.json
+tsconfig.node.json
+postcss.config.js
+tailwind.config.js
+render.yaml
+*.md

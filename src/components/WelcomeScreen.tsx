@@ -16,7 +16,7 @@ export default function WelcomeScreen({ onStart }: Props) {
       style={{
         position: 'absolute', inset: 0, zIndex: 50,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(3,3,5,0.3)'
+        background: 'radial-gradient(ellipse at top right, rgba(139,92,246,0.15), transparent 60%), radial-gradient(ellipse at bottom left, rgba(167,139,250,0.1), rgba(10,5,20,0.4) 80%)'
       }}
     >
       

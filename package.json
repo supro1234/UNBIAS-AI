@@ -6,6 +6,7 @@
   "scripts": {
     "dev:client": "vite",
     "dev:server": "nodemon server/index.js",
+    "start": "node server/index.js",
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

@@ -25,7 +25,15 @@ export default function Layout({ children, title, subtitle }: LayoutProps) {
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', letterSpacing: '-.01em' }}>{title}</div>
+          <div style={{
+            fontSize: 18, fontWeight: 900, letterSpacing: '-.01em',
+            background: 'linear-gradient(135deg, #FFF 0%, #C084FC 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 0 24px rgba(192,132,252,0.4)'
+          }}>
+            {title}
+          </div>
           {subtitle && <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>{subtitle}</div>}
         </div>
       </header>
