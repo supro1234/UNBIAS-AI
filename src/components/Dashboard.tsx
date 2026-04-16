@@ -8,6 +8,7 @@ import {
   ShieldCheck, AlertTriangle, Cpu,
   X, Activity, RefreshCw, Zap, Globe, Clock, TrendingUp, Database,
 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -299,9 +300,9 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [sumR, histR, quotaR] = await Promise.all([
-        fetch('http://localhost:3001/api/summary'),
-        fetch('http://localhost:3001/api/scan-history'),
-        fetch('http://localhost:3001/api/quota-status'),
+        fetch(`${API_BASE_URL}/api/summary`),
+        fetch(`${API_BASE_URL}/api/scan-history`),
+        fetch(`${API_BASE_URL}/api/quota-status`),
       ]);
       const sumD   = await sumR.json()   as SummaryData  & { success: boolean };
       const histD  = await histR.json()  as { success: boolean; history: ScanHistoryEntry[] };
@@ -323,7 +324,7 @@ export default function Dashboard() {
     setMitigating(id);
     notify(`Running mitigation on ${name}…`);
     try {
-      const r = await fetch('http://localhost:3001/api/mitigate', {
+      const r = await fetch(`${API_BASE_URL}/api/mitigate`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ modelId: id }),
       });

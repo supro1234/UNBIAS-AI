@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Key, Lock, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 interface Props {
   onSuccess: (key: string) => void;
@@ -22,7 +23,7 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
 
     try {
       // We'll call the backend to validate the key against a simple Gemini list models call
-      const res = await fetch('http://localhost:3001/api/validate-key', {
+      const res = await fetch(`${API_BASE_URL}/api/validate-key`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey })

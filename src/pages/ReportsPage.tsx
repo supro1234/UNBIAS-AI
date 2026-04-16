@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 import Layout from '../components/Layout';
 import { Download, Globe, Clock, ShieldCheck, AlertTriangle, RefreshCw, FileText } from 'lucide-react';
 import { downloadAuditReport } from '../utils/generateReport';
@@ -41,7 +42,7 @@ export default function ReportsPage() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const r = await fetch('http://localhost:3001/api/scan-history');
+      const r = await fetch(`${API_BASE_URL}/api/scan-history`);
       const d = await r.json() as { success: boolean; history: ScanEntry[] };
       if (d.success) setHistory(d.history);
     } catch { /* backend not running */ }

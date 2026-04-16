@@ -487,7 +487,7 @@ app.post('/api/mitigate', (req, res) => {
   res.json({ success: true, message: 'AI Recommendation applied to session memory.', newFairnessScore: 92 });
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`[UnbiasNet] Backend running on port ${PORT}`);
   console.log(`[UnbiasNet] Model chain: ${MODELS.join(' → ')}`);

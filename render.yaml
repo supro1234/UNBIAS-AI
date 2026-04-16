@@ -1,0 +1,26 @@
+services:
+  # The Backend API (Express + Puppeteer via Docker)
+  - type: web
+    name: unbiased-ai-backend
+    env: docker
+    region: oregon 
+    plan: free
+    healthCheckPath: /api/quota-status
+    envVars:
+      - key: PORT
+        value: 3000
+
+  # The Frontend UI (Vite Static Site)
+  - type: web
+    name: unbiased-ai-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: unbiased-ai-backend
+          envVarKey: RENDER_EXTERNAL_URL
