@@ -9,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.json({ status: 'active', platform: 'UnbiasNet API', engine: 'Gemini-Integrated' });
+});
+
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 /**
