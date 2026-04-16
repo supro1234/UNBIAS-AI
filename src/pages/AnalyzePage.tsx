@@ -382,10 +382,11 @@ export default function AnalyzePage({ apiKey }: Props) {
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={18} color="rgba(13,202,240,0.5)" style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)' }} />
           <input
-            type="text" value={url}
+            type="url" value={url} id="audit-url-input"
             onChange={e => setUrl(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && runLiveAudit()}
             placeholder="https://target-website.com — press Enter or click Audit"
+            aria-label="Target website URL to analyze"
             disabled={running}
             className="focus:ring-2 focus:ring-blue-400 transition-all border-transparent focus:border-blue-400"
             style={{
@@ -399,6 +400,7 @@ export default function AnalyzePage({ apiKey }: Props) {
         <button
           id="start-audit-btn"
           onClick={runLiveAudit} disabled={running || !url}
+          aria-label={running ? "Auditing in progress..." : "Audit target URL"}
           className="glass-primary group transition-all active:scale-95 focus:ring-2 focus:ring-blue-400"
           style={{
             display: 'flex', alignItems: 'center', gap: 10, padding: '16px 36px', borderRadius: 14,
@@ -407,7 +409,7 @@ export default function AnalyzePage({ apiKey }: Props) {
             opacity: (running || !url) ? 0.6 : 1, flexShrink: 0,
           }}
         >
-          {running ? <RefreshCw size={18} className="spin" /> : <Play size={18} />}
+          {running ? <RefreshCw size={18} className="spin" aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
           {running ? 'Auditing…' : 'Audit URL'}
         </button>
       </div>
@@ -425,7 +427,16 @@ export default function AnalyzePage({ apiKey }: Props) {
       )}
 
       {/* ── SCAN PROGRESS ─────────────────────────────────────────────────── */}
-      {running && <ScanProgress stage={stage} />}
+      {running && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <ScanProgress stage={stage} />
+          <div className="skeleton" style={{ height: '140px', marginBottom: '10px' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+            <div className="skeleton" style={{ height: '230px' }} />
+            <div className="skeleton" style={{ height: '230px' }} />
+          </div>
+        </div>
+      )}
 
       {/* ── RESULTS ───────────────────────────────────────────────────────── */}
       {results && !running && score !== null && (
@@ -522,6 +533,7 @@ export default function AnalyzePage({ apiKey }: Props) {
               <button
                 id="download-docx-btn"
                 onClick={handleDownload} disabled={downloading}
+                aria-label="Download DOCX Report"
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   padding: '12px 0', borderRadius: 12,
@@ -531,7 +543,7 @@ export default function AnalyzePage({ apiKey }: Props) {
                   opacity: downloading ? 0.6 : 1, transition: 'all 0.3s',
                 }}
               >
-                {downloading ? <RefreshCw size={15} className="spin" /> : <Download size={15} />}
+                {downloading ? <RefreshCw size={15} className="spin" aria-hidden="true" /> : <Download size={15} aria-hidden="true" />}
                 {downloading ? 'Generating…' : 'Download DOCX Report'}
               </button>
             </div>
@@ -558,8 +570,8 @@ export default function AnalyzePage({ apiKey }: Props) {
             <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.08em' }}>Fairness Radar</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Multi-dimension bias overview</div>
-              <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-                <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 230 }}>
+              <div style={{ background: 'rgba(0,0,0,0.4)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.2)' }}>
+                <div style={{ height: 230 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={radarData}>
                       <PolarGrid stroke="rgba(255,255,255,0.06)" />
@@ -574,8 +586,8 @@ export default function AnalyzePage({ apiKey }: Props) {
             <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.08em' }}>4/5ths Rule Scatter</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Acceptance Rate vs Impact Ratio per group</div>
-              <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-                <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 230 }}>
+              <div style={{ background: 'rgba(0,0,0,0.4)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.2)' }}>
+                <div style={{ height: 230 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart margin={{ top: 10, right: 10, bottom: 0, left: -10 }}>
                       <XAxis type="number" dataKey="x" name="Acceptance %" domain={[0, 100]}
@@ -629,8 +641,8 @@ export default function AnalyzePage({ apiKey }: Props) {
             <div className="glass-primary" style={{ borderRadius: 18, padding: '20px 24px' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.08em' }}>Bias Proxy Detection</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Feature correlation with protected attributes</div>
-              <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-                <div className="bg-gradient-to-br from-[#06060A] via-[#06060A]/80 to-[#06060A] p-4 rounded-lg" style={{ height: 200 }}>
+              <div style={{ background: 'rgba(0,0,0,0.4)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.2)' }}>
+                <div style={{ height: 200 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={fcChart} layout="vertical">
                       <XAxis type="number" domain={[0, 100]} hide />
@@ -693,6 +705,7 @@ export default function AnalyzePage({ apiKey }: Props) {
             <button
               id="download-docx-bottom-btn"
               onClick={handleDownload} disabled={downloading}
+              aria-label="Download Full Report .docx"
               style={{
                 display: 'flex', alignItems: 'center', gap: 10, padding: '14px 48px', borderRadius: 14,
                 background: `linear-gradient(135deg, rgba(32,201,151,0.18), rgba(10,110,253,0.18))`,
@@ -702,7 +715,7 @@ export default function AnalyzePage({ apiKey }: Props) {
                 boxShadow: downloading ? 'none' : '0 0 30px rgba(32,201,151,0.12)',
               }}
             >
-              {downloading ? <RefreshCw size={16} className="spin" /> : <Download size={16} />}
+              {downloading ? <RefreshCw size={16} className="spin" aria-hidden="true" /> : <Download size={16} aria-hidden="true" />}
               {downloading ? 'Generating DOCX…' : 'Download Full Report (.docx)'}
             </button>
           </div>

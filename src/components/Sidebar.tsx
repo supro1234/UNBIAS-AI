@@ -13,7 +13,9 @@ interface Props { active:string; onNav:(p:string)=>void; apiKeyStatus: boolean; 
 
 export default function Sidebar({ active, onNav, apiKeyStatus }: Props) {
   return (
-    <aside style={{
+    <aside 
+      aria-label="Sidebar Navigation"
+      style={{
       position:'fixed', left:0, top:0, bottom:0, width:'var(--sidebar-w)',
       zIndex:30, display:'flex', flexDirection:'column',
       background:'rgba(6,6,12,0.75)',
@@ -41,10 +43,17 @@ export default function Sidebar({ active, onNav, apiKeyStatus }: Props) {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex:1, padding:'10px 10px', display:'flex', flexDirection:'column', gap:2 }}>
+      <nav aria-label="Main Navigation" style={{ flex:1, padding:'10px 10px', display:'flex', flexDirection:'column', gap:2 }}>
         {nav.map(({ id, icon:Icon, label }) => (
-          <button key={id} className={`nav-item ${active===id?' active':''}`} onClick={() => onNav(id)}>
+          <button 
+            key={id} 
+            className={`nav-item ${active===id?' active':''}`} 
+            onClick={() => onNav(id)}
+            aria-label={`Navigate to ${label}`}
+            aria-current={active===id ? 'page' : undefined}
+          >
             <Icon size={16} strokeWidth={active===id?2.2:1.8}
+              aria-hidden="true"
               style={{ color: active===id?'#C084FC':'inherit', flexShrink:0 }}/>
             <span className="sidebar-text-content">{label}</span>
           </button>

@@ -215,6 +215,65 @@ The downloadable audit report contains 7 professional sections:
 
 ---
 
+## 📖 API Documentation
+
+The backend service runs completely locally and provides JSON-based REST APIs.
+
+### `POST /api/validate-key`
+Validates if a given Gemini API Key is working.
+- **Request Body**: `{ "apiKey": "string" }`
+- **Response**: `{ "success": true }` or `{ "success": false, "error": "Reason" }`
+
+### `POST /api/live-audit`
+Runs a deep SPA crawl and passes extracted data to the Gemini engine for fairness analysis.
+- **Request Body**: `{ "url": "https://example.com", "apiKey": "string" }`
+- **Response**: Returns a full `AuditResult` object including `overallBiasScore`, `keyFindings`, and `analysisResults`.
+
+### `GET /api/scan-history`
+Fetches the last 50 successful scans from the in-memory database.
+- **Response**: `{ "success": true, "history": [{ "url": "...", "overallBiasScore": 85 }] }`
+
+### `POST /api/mitigate`
+Instructs the platform to perform a virtual mitigation on a specified model.
+- **Request Body**: `{ "modelId": "string" }`
+- **Response**: `{ "success": true, "newFairnessScore": 92 }`
+
+---
+
+## 🚀 Deployment Guide
+
+### Single-Service Deployment (Render / Railway)
+Since the `unbiased-ai` repository has a customized `render.yaml` and a `Dockerfile`, it can be deployed easily as a unified service. 
+
+1. **Push to GitHub**: Make sure your code is on a remote branch.
+2. **Setup on Render**: Connect your GitHub repository to Render and use the `render.yaml` configuration.
+3. **Puppeteer Dependencies**: The provided Dockerfile is explicitly configured with necessary apt-packages to run a headless Chrome environment, ensuring crawling works perfectly in production.
+4. **Environment Variables**: No sensitive backend variables are required natively. End-users provide their own Gemini API keys!
+
+### Local Docker Build
+If deploying on private infrastructure:
+```bash
+docker build -t unbiased-ai:latest .
+docker run -p 3001:3001 -p 5173:5173 unbiased-ai:latest
+```
+
+---
+
+## 🤝 Contribution Guide
+
+We embrace community contributions! To get started:
+
+1. **Fork & Clone**: Fork the repository and clone it to your local machine.
+2. **Branching Strategy**: Create a feature branch with a descriptive name (e.g., `feature/sidebar-accessibility` or `bugfix/chart-contrast`).
+3. **Run the Test Suite**: Before committing, ensure you run the unit tests:
+   ```bash
+   npm test
+   ```
+4. **Lint your code**: Run the built-in linter to check for structural issues:
+   ```bash
+   npm run lint
+   ```
+5. **Open a PR**: Submit your Pull Request detailing what you changed, why it’s needed, and link to any relevant issues.
 
 ---
 

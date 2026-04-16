@@ -35,7 +35,7 @@ export default function ApiKeySetup({ onSuccess, onBack }: Props) {
       } else {
         setError(data.error || 'Invalid API Key. Please check and try again.');
       }
-    } catch (err) {
+    } catch {
       setError('Connection failed. Make sure the backend server is running.');
     } finally {
       setValidating(false);

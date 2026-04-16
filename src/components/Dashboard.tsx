@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Layout from '../components/Layout';
+import Toast from './Toast';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import {
   ShieldCheck, AlertTriangle, Cpu,
-  X, Activity, RefreshCw, Zap, Globe, Clock, TrendingUp, Database,
+  RefreshCw, Zap, Globe, Clock, TrendingUp, Database,
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
@@ -93,34 +94,6 @@ const statusStyle: Record<string, React.CSSProperties> = {
   Warning:  { background: 'rgba(255,193,7,.12)',   color: '#ffc107', border: '1px solid rgba(255,193,7,.3)' },
   Fair:     { background: 'rgba(32,201,151,.12)',  color: '#20c997', border: '1px solid rgba(32,201,151,.3)' },
 };
-
-// ─── Toast ───────────────────────────────────────────────────────────────────
-
-interface ToastProps { msg: string; type: string; close: () => void; }
-
-function Toast({ msg, type, close }: ToastProps) {
-  useEffect(() => {
-    const t = setTimeout(close, 4500);
-    return () => clearTimeout(t);
-  }, [close]);
-
-  const clr = type === 'error' ? C.red : type === 'success' ? C.green : C.violet;
-  return (
-    <div style={{
-      position: 'fixed', top: 20, right: 20, zIndex: 9999, padding: '14px 18px',
-      display: 'flex', alignItems: 'center', gap: 12, minWidth: 300,
-      background: 'rgba(5,8,20,0.95)', border: `1px solid ${clr}33`,
-      borderRadius: 14, boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      animation: 'fadeUp .35s ease both',
-    }}>
-      <Activity size={16} style={{ color: clr, flexShrink: 0 }} />
-      <span style={{ fontSize: 13, color: '#ddd', flex: 1 }}>{msg}</span>
-      <button onClick={close} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)' }}>
-        <X size={14} />
-      </button>
-    </div>
-  );
-}
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 
@@ -291,10 +264,10 @@ export default function Dashboard() {
   const [history, setHistory]       = useState<ScanHistoryEntry[]>([]);
   const [loading, setLoading]       = useState(true);
   const [mitigating, setMitigating] = useState<string | null>(null);
-  const [toast, setToast]           = useState<{ msg: string; type: string } | null>(null);
+  const [toast, setToast]           = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [quota, setQuota]           = useState<QuotaStatus | null>(null);
 
-  const notify = (msg: string, type = 'info') => setToast({ msg, type });
+  const notify = (msg: string, type: 'success' | 'error' | 'info' = 'info') => setToast({ msg, type });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -386,8 +359,9 @@ export default function Dashboard() {
       {/* Top action bar */}
       <div style={{ position: 'absolute', top: 12, right: 28, zIndex: 100, display: 'flex', alignItems: 'center', gap: 10 }}>
         <button onClick={fetchData} disabled={loading}
+          aria-label="Refresh Dashboard"
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontSize: 12, fontWeight: 700, color: C.violet, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
-          <RefreshCw size={13} className={loading ? 'spin' : ''} />
+          <RefreshCw size={13} className={loading ? 'spin' : ''} aria-hidden="true" />
           Refresh
         </button>
       </div>
@@ -428,8 +402,8 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-            <div className={loading ? "skeleton" : ""} style={{ height: 220, background: 'rgba(0,0,0,0.45)', borderRadius: 12, padding: 16, border: '1px solid rgba(139,92,246,0.15)' }}>
+          <div style={{ background: 'rgba(0,0,0,0.4)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.2)' }}>
+            <div className={loading ? "skeleton" : ""} style={{ height: 220 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trendData} margin={{ top: 5, right: 0, bottom: 0, left: -10 }}>
                   <defs>
@@ -474,8 +448,8 @@ export default function Dashboard() {
         <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Score Distribution</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Fairness score breakdown across all scanned URLs</div>
-          <div className="glass-secondary p-4" style={{ borderRadius: 18 }}>
-            <div className={loading ? "skeleton" : ""} style={{ height: 180, background: 'rgba(0,0,0,0.45)', borderRadius: 12, padding: 16, border: '1px solid rgba(139,92,246,0.15)' }}>
+          <div style={{ background: 'rgba(0,0,0,0.4)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.2)' }}>
+            <div className={loading ? "skeleton" : ""} style={{ height: 180 }}>
               <ResponsiveContainer width="100%" height="100%">
               <BarChart data={scoreDistData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
                 <XAxis dataKey="range" tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.4)' }} axisLine={false} tickLine={false} />
@@ -493,8 +467,8 @@ export default function Dashboard() {
         <div className="glass-violet" style={{ borderRadius: 18, padding: '22px 24px' }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.7)', marginBottom: 4 }}>Audit Depth Radar</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginBottom: 16 }}>Multi-dimension audit coverage quality</div>
-          <div className="glass-secondary p-4" style={{ borderRadius: 18, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div className={loading ? "skeleton" : ""} style={{ flex: 1, minHeight: 200, background: 'rgba(6,6,10,1)', borderRadius: 12, padding: 16, border: '1px solid rgba(139,92,246,0.15)' }}>
+          <div style={{ background: 'rgba(0,0,0,0.4)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.2)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div className={loading ? "skeleton" : ""} style={{ flex: 1, minHeight: 200 }}>
               <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
                 <PolarGrid stroke="rgba(255,255,255,0.06)" />
@@ -621,13 +595,14 @@ export default function Dashboard() {
               {m.status}
             </span>
             <button onClick={() => mitigate(m.id, m.name)} disabled={mitigating === m.id}
+              aria-label={`Fix and apply mitigation for ${m.name}`}
               style={{
                 display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 9,
                 border: `1px solid rgba(10,110,253,0.2)`, background: 'rgba(10,110,253,0.07)',
                 color: C.blue, fontSize: 11, fontWeight: 700, cursor: 'pointer',
                 opacity: mitigating === m.id ? 0.5 : 1, transition: 'all .2s', flexShrink: 0,
               }}>
-              {mitigating === m.id ? <RefreshCw size={11} className="spin" /> : <Zap size={11} />}
+              {mitigating === m.id ? <RefreshCw size={11} className="spin" aria-hidden="true" /> : <Zap size={11} aria-hidden="true" />}
               {mitigating === m.id ? '…' : 'Fix'}
             </button>
           </div>
