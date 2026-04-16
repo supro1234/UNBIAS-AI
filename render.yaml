@@ -11,9 +11,9 @@ services:
         value: 3000
 
   # The Frontend UI (Vite Static Site)
-  - type: static
+  - type: web
     name: unbiased-ai-frontend
-    env: static
+    runtime: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:
