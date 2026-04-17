@@ -141,6 +141,19 @@ h2 {
   from { background-position:-600px 0; }
   to   { background-position: 600px 0; }
 }
+@keyframes slideThrough {
+  from { transform: translateX(-200%) skewX(-20deg); }
+  to   { transform: translateX(500%) skewX(-20deg); }
+}
+@keyframes floatY {
+  0%,100% { transform:translateY(0); }
+  50%     { transform:translateY(-8px); }
+}
+@keyframes gradShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
 .fade-up { animation: fadeUp .45s cubic-bezier(.4,0,.2,1) both; }
 .spin     { animation: spin 1.1s linear infinite; }

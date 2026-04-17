@@ -27,27 +27,27 @@ export default function App() {
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [active, setActive] = useState('dashboard');
 
-  // Reset on refresh behavior: strictly in-memory
-  // Since step/apiKey are state, they reset naturally on reload.
-
-  const handleStart = () => setStep('setup');
-  const handleKeySuccess = (key: string) => {
-    setApiKey(key);
-    setStep('app');
-  };
-  const handleBack = () => setStep('welcome');
+  const handleStart     = () => setStep('setup');
+  const handleKeySuccess = (key: string) => { setApiKey(key); setStep('app'); };
+  const handleBack      = () => setStep('welcome');
+  // Allow sidebar "API Setup" button to go straight to the setup screen from the app
+  const handleApiSetup  = () => setStep('setup');
 
   const Page = pages[active] ?? Dashboard;
 
   return (
     <ErrorBoundary>
-      <div style={{ minHeight:'100vh', position:'relative', overflow: 'hidden' }}>
-        {/* Persistant 3D/4D Background */}
+      <div style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+        {/* Persistent 3D background */}
         <NetworkBackground />
 
         <AnimatePresence mode="wait">
           {step === 'welcome' && (
-            <WelcomeScreen key="welcome" onStart={handleStart} />
+            <WelcomeScreen
+              key="welcome"
+              onStart={handleStart}
+              onSetupApi={handleStart}   // both buttons go to setup
+            />
           )}
 
           {step === 'setup' && (
@@ -55,16 +55,20 @@ export default function App() {
           )}
 
           {step === 'app' && (
-            <motion.div 
-              key="app" 
-              initial={{ opacity: 0, y: 30, scale: 0.98 }} 
-              animate={{ opacity: 1, y: 0, scale: 1 }} 
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            <motion.div
+              key="app"
+              initial={{ opacity: 0, y: 24, scale: 0.99 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
               style={{ display: 'flex', minHeight: '100vh', width: '100%' }}
             >
-              <Sidebar active={active} onNav={setActive} apiKeyStatus={!!apiKey} />
+              <Sidebar
+                active={active}
+                onNav={setActive}
+                apiKeyStatus={!!apiKey}
+                onApiSetup={handleApiSetup}
+              />
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* We pass the apiKey to pages that need it, like AnalyzePage */}
                 <Page apiKey={apiKey} />
               </div>
             </motion.div>

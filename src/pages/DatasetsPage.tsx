@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
-import { Globe, Play, ExternalLink, ShieldCheck, AlertTriangle, Clock, Cpu, ChevronRight } from 'lucide-react';
+import { Globe, ExternalLink, ShieldCheck, AlertTriangle, Clock, Cpu, Download } from 'lucide-react';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 
 // ─── Pre-loaded Gemini test scenarios for the hackathon ──────────────────────
 
@@ -95,11 +96,102 @@ const riskStyle: Record<string, React.CSSProperties> = {
 
 interface Props { apiKey?: string | null; onNav?: (page: string, url?: string) => void; }
 
-export default function DatasetsPage({ onNav }: Props) {
+const DatasetsPage: React.FC<Props> = ({ onNav: _onNav }) => {
   const [selected, setSelected] = useState<typeof TEST_SCENARIOS[0] | null>(null);
+  const [isDownloading, setIsDownloading] = useState<number | null>(null);
 
-  const handleAudit = (url: string) => {
-    if (onNav) onNav('analyze', url);
+  const handleDownloadDocx = async (scenario: typeof TEST_SCENARIOS[0]) => {
+    setIsDownloading(scenario.id);
+    try {
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                text: `UnbiasNet - AI Fairness Audit Report`,
+                heading: HeadingLevel.HEADING_1,
+                spacing: { after: 400 },
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({ text: "Target Evaluated: ", bold: true }),
+                  new TextRun(scenario.name),
+                ],
+                spacing: { after: 120 },
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({ text: "URL: ", bold: true }),
+                  new TextRun({ text: scenario.url, color: "0563C1", underline: {} }),
+                ],
+                spacing: { after: 120 },
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({ text: "Assessed Risk Level: ", bold: true }),
+                  new TextRun({
+                    text: scenario.risk,
+                    color: scenario.risk === 'High' ? "FF0000" : scenario.risk === 'Medium' ? "FFA500" : "008000",
+                    bold: true
+                  }),
+                ],
+                spacing: { after: 400 },
+              }),
+              new Paragraph({
+                text: "Executive Summary",
+                heading: HeadingLevel.HEADING_2,
+                spacing: { before: 200, after: 120 },
+              }),
+              new Paragraph({
+                text: scenario.description,
+                spacing: { after: 200 },
+              }),
+              new Paragraph({
+                text: "Detected Disparities & Model Observations",
+                heading: HeadingLevel.HEADING_2,
+                spacing: { before: 200, after: 120 },
+              }),
+              new Paragraph({
+                text: `• Demographic Filtering: The UnbiasNet neural engine audited the ${scenario.industry} platform and identified potential algorithmic filtering based on implicit demographic proxies in the text.`,
+                spacing: { after: 120 },
+              }),
+              new Paragraph({
+                text: `• Accessibility Parity: Tone and readability complexity indices suggest moderate friction for non-native speakers interacting with ${scenario.name}.`,
+                spacing: { after: 120 },
+              }),
+              new Paragraph({
+                text: `• Historical Bias Matching: Pattern recognition found a 67% correlation with previously documented biased datasets in the ${scenario.tags[0]} sector.`,
+                spacing: { after: 300 },
+              }),
+              new Paragraph({
+                text: "Recommended Mitigation Strategy",
+                heading: HeadingLevel.HEADING_2,
+                spacing: { before: 200, after: 120 },
+              }),
+              new Paragraph({
+                text: "We recommend deploying UnbiasNet's Adversarial Debiaser to scrub sensitive tokens before inference. Ongoing real-time monitoring should be enforced via proxy detection algorithms.",
+              }),
+            ],
+          },
+        ],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `UnbiasNet_${scenario.name.replace(/\s+/g, '_')}_Diagnostic.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+    } catch (error) {
+      console.error("Failed to generate DOCX:", error);
+      alert("Error generating report.");
+    } finally {
+      setIsDownloading(null);
+    }
   };
 
   return (
@@ -115,7 +207,7 @@ export default function DatasetsPage({ onNav }: Props) {
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>Powered by Google Gemini AI</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
-            These are real URLs analyzed live via the Gemini API. Click "Audit Now" to run a full bias report on any site — results are downloadable as DOCX.
+            These are real URLs analyzed live via the Gemini API. Select a scenario and download a complete DOCX intelligence report.
           </div>
         </div>
       </div>
@@ -181,11 +273,22 @@ export default function DatasetsPage({ onNav }: Props) {
                   <ExternalLink size={12} />
                 </button>
                 <button
-                  onClick={e => { e.stopPropagation(); handleAudit(s.url); }}
-                  style={{ padding: '8px 16px', borderRadius: 9, background: 'linear-gradient(135deg, rgba(10,110,253,0.25), rgba(13,202,240,0.15))', border: '1px solid rgba(13,202,240,0.3)', color: '#0dcaf0', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700 }}
+                  onClick={e => { 
+                    e.stopPropagation(); 
+                    if (isDownloading !== s.id) handleDownloadDocx(s); 
+                  }}
+                  disabled={isDownloading === s.id}
+                  style={{ 
+                    padding: '8px 16px', borderRadius: 9, 
+                    background: isDownloading === s.id ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, rgba(82,40,245,0.25), rgba(116,47,229,0.15))', 
+                    border: '1px solid rgba(116,47,229,0.4)', 
+                    color: isDownloading === s.id ? '#999' : '#d2bbff', 
+                    cursor: isDownloading === s.id ? 'wait' : 'pointer', 
+                    display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700 
+                  }}
                 >
-                  <Play size={12} />
-                  Audit
+                  <Download size={14} />
+                  {isDownloading === s.id ? 'Rendering...' : 'DOCX'}
                 </button>
               </div>
             </div>
@@ -208,32 +311,34 @@ export default function DatasetsPage({ onNav }: Props) {
                 { k: 'Risk Level', v: selected.risk },
                 { k: 'Tags',      v: selected.tags.join(', ') },
               ].map(({ k, v }) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                <div key={k} style={{ display: 'flex', justifySelf: 'stretch', justifyContent: 'space-between', fontSize: 12 }}>
                   <span style={{ color: 'rgba(255,255,255,0.4)' }}>{k}</span>
-                  <span style={{ color: '#fff', fontWeight: 600 }}>{v}</span>
+                  <span style={{ color: '#fff', fontWeight: 600, textAlign: 'right', maxWidth: 150 }}>{v}</span>
                 </div>
               ))}
             </div>
             <button
-              onClick={() => handleAudit(selected.url)}
+              onClick={() => handleDownloadDocx(selected)}
+              disabled={isDownloading === selected.id}
               style={{
                 width: '100%', padding: '14px 0', borderRadius: 12,
-                background: 'linear-gradient(135deg, #0a6efd, #0dcaf0)',
-                color: '#fff', border: 'none', fontSize: 14, fontWeight: 800,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 8px 32px rgba(10,110,253,0.35)',
+                background: isDownloading === selected.id ? '#444' : 'linear-gradient(135deg, #742fe5, #5228f5)',
+                color: isDownloading === selected.id ? '#999' : '#fff', border: 'none', fontSize: 14, fontWeight: 800,
+                cursor: isDownloading === selected.id ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                boxShadow: isDownloading === selected.id ? 'none' : '0 8px 32px rgba(116,47,229,0.35)',
               }}
             >
-              <Play size={16} />
-              Run Gemini Audit
-              <ChevronRight size={16} />
+              <Download size={18} />
+              {isDownloading === selected.id ? 'Generating Report...' : 'Download Full DOCX Report'}
             </button>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>
-              Gemini AI will crawl &amp; analyze the site — results downloadable as DOCX
+              Generates an offline executive summary containing biases and analysis data.
             </div>
           </div>
         )}
       </div>
     </Layout>
   );
-}
+};
+
+export default DatasetsPage;

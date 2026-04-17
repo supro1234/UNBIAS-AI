@@ -135,7 +135,7 @@ const ringFragmentShader = `
     vec2  c = 2.*gl_PointCoord - 1.;
     float r = dot(c,c);
     if(r > 1.) discard;
-    gl_FragColor = vec4(0.45, 0.15, 0.85, a * 0.7);
+    gl_FragColor = vec4(0.45, 0.15, 0.85, vAlpha * 0.7);
   }
 `;
 
